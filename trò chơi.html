@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎯 Quay Số Gọi Trả Bài</title>
+<style>
+  :root{
+    --c1:#6a11cb; --c2:#2575fc; --c3:#ff6a88; --c4:#ffb347;
+    --glass: rgba(255,255,255,0.12);
+    --glass-border: rgba(255,255,255,0.25);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{
+    font-family:'Segoe UI', Tahoma, Arial, sans-serif;
+    min-height:100vh;
+    color:#fff;
+    overflow-x:hidden;
+    background: linear-gradient(-45deg, var(--c1), var(--c2), var(--c3), var(--c4));
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+    display:flex; flex-direction:column; align-items:center;
+    padding:20px;
+  }
+  @keyframes gradientShift{
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+  }
+  .blob{
+    position:fixed; border-radius:50%;
+    background:rgba(255,255,255,0.08);
+    filter:blur(2px);
+    animation: float 10s ease-in-out infinite;
+    pointer-events:none; z-index:0;
+  }
+  @keyframes float{
+    0%,100%{transform:translateY(0) translateX(0);}
+    50%{transform:translateY(-40px) translateX(20px);}
+  }
+  h1{
+    font-size:2.4rem;
+    text-align:center;
+    margin:10px 0 20px;
+    background: linear-gradient(90deg,#fff,#ffe066,#fff);
+    background-size:200% auto;
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    animation: shine 3s linear infinite;
+    text-shadow: 0 0 30px rgba(255,255,255,0.3);
+    z-index:1;
+  }
+  @keyframes shine{
+    to{background-position:200% center;}
+  }
+  .panel{
+    background: var(--glass);
+    border:1px solid var(--glass-border);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-radius:20px;
+    padding:22px 26px;
+    box-shadow:0 8px 32px rgba(0,0,0,0.25);
+    max-width:900px;
+    width:100%;
+    margin-bottom:22px;
+    z-index:1;
+  }
+  .row{display:flex; flex-wrap:wrap; gap:14px; align-items:center; margin-bottom:14px;}
+  label{font-weight:600; margin-right:6px;}
+  .toggle-group{display:flex; gap:10px;}
+  .toggle-btn{
+    padding:10px 20px; border-radius:30px; cursor:pointer;
+    border:2px solid rgba(255,255,255,0.4);
+    background:rgba(255,255,255,0.08);
+    transition:.25s;
+    font-weight:600;
+    user-select:none;
+  }
+  .toggle-btn.active{
+    background: linear-gradient(135deg,#ff6a88,#ffb347);
+    border-color:transparent;
+    box-shadow:0 4px 15px rgba(255,106,136,.5);
+    transform:scale(1.05);
+  }
+  .toggle-btn:hover{transform:translateY(-2px);}
+  textarea{
+    width:100%; min-height:110px; border-radius:12px; border:none;
+    padding:12px; font-size:14px; resize:vertical;
+    background:rgba(255,255,255,0.9); color:#222;
+  }
+  input[type=number]{
+    width:80px; padding:8px 10px; border-radius:10px; border:none;
+    font-size:15px; text-align:center;
+  }
+  .small-btn{
+    padding:9px 16px; border:none; border-radius:10px; cursor:pointer;
+    background:rgba(255,255,255,0.18); color:#fff; font-weight:600;
+    border:1px solid rgba(255,255,255,0.35);
+    transition:.2s;
+  }
+  .small-btn:hover{background:rgba(255,255,255,0.3); transform:translateY(-2px);}
+  .checkbox-row{display:flex; align-items:center; gap:8px;}
+  input[type=checkbox]{width:18px; height:18px; cursor:pointer;}
+  #spinBtn{
+    display:block; margin:10px auto 0; padding:18px 50px;
+    font-size:1.3rem; font-weight:800; letter-spacing:1px;
+    border:none; border-radius:50px; cursor:pointer; color:#fff;
+    background: linear-gradient(135deg,#ff512f,#dd2476);
+    box-shadow:0 10px 25px rgba(221,36,118,0.5);
+    animation: pulse 2s infinite;
+    transition:.2s;
+  }
+  #spinBtn:disabled{opacity:.5; cursor:not-allowed; animation:none;}
+  #spinBtn:hover:not(:disabled){transform:scale(1.06);}
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(221,36,118,0.6);}
+    70%{box-shadow:0 0 0 20px rgba(221,36,118,0);}
+    100%{box-shadow:0 0 0 0 rgba(221,36,118,0);}
+  }
+  #stage{
+    display:flex; flex-wrap:wrap; justify-content:center; gap:20px;
+    margin:20px 0; min-height:140px; z-index:1;
+  }
+  .slot{
+    width:170px; height:120px; border-radius:18px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.4rem; font-weight:800; text-align:center;
+    padding:10px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.25), rgba(255,255,255,0.05));
+    border:2px solid rgba(255,255,255,0.35);
+    box-shadow: inset 0 0 20px rgba(255,255,255,0.1), 0 8px 20px rgba(0,0,0,0.3);
+    transition: transform .15s;
+    word-break:break-word;
+  }
+  .slot.spinning{animation: shake .12s infinite;}
+  @keyframes shake{
+    0%{transform:translateY(0);}
+    50%{transform:translateY(-4px);}
+    100%{transform:translateY(0);}
+  }
+  .slot.locked{
+    background: linear-gradient(145deg,#ffd200,#f7971e);
+    color:#2b2b2b;
+    border-color:#fff;
+    box-shadow:0 0 35px rgba(255,210,0,0.9), 0 10px 25px rgba(0,0,0,0.3);
+    transform:scale(1.12);
+    animation: popIn .4s ease;
+  }
+  @keyframes popIn{
+    0%{transform:scale(0.5) rotate(-15deg); opacity:0;}
+    70%{transform:scale(1.2) rotate(5deg); opacity:1;}
+    100%{transform:scale(1.12) rotate(0);}
+  }
+  #historyBox{
+    margin-top:10px;
+    display:flex; flex-wrap:wrap; gap:8px;
+    max-height:140px; overflow-y:auto;
+  }
+  .chip{
+    background:rgba(255,255,255,0.2);
+    border:1px solid rgba(255,255,255,0.4);
+    padding:6px 12px; border-radius:20px; font-size:0.85rem;
+  }
+  canvas#confetti{
+    position:fixed; top:0; left:0; width:100%; height:100%;
+    pointer-events:none; z-index:999;
+  }
+  footer{opacity:.75; font-size:.8rem; margin-top:10px; text-align:center;}
+  @media(max-width:600px){
+    h1{font-size:1.6rem;}
+    .slot{width:130px; height:100px; font-size:1.1rem;}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="confetti"></canvas>
+
+<h1>🎯 VÒNG QUAY GỌI TRẢ BÀI 🎯</h1>
+
+<div class="panel">
+  <div class="row">
+    <label>Chế độ:</label>
+    <div class="toggle-group">
+      <div class="toggle-btn active" id="modeNameBtn">👤 Theo Tên</div>
+      <div class="toggle-btn" id="modeNumberBtn">🔢 Theo Số</div>
+    </div>
+    <button class="small-btn" id="soundBtn">🔊 Âm thanh: Bật</button>
+  </div>
+
+  <div id="nameSection">
+    <div class="row">
+      <label>Danh sách tên (mỗi dòng 1 tên, tối đa 100):</label>
+      <button class="small-btn" id="genNamesBtn">✨ Tạo 100 tên mẫu</button>
+    </div>
+    <textarea id="nameList" placeholder="Nhập tên học sinh, mỗi dòng 1 tên..."></textarea>
+  </div>
+
+  <div id="numberSection" style="display:none;">
+    <div class="row">
+      <label>Tạo dãy số từ 1 đến:</label>
+      <input type="number" id="maxNumber" value="100" min="2" max="100">
+      <button class="small-btn" id="genNumbersBtn">🔁 Tạo danh sách số</button>
+    </div>
+    <textarea id="numberList" placeholder="Danh sách số sẽ hiện ở đây..."></textarea>
+  </div>
+
+  <div class="row">
+    <label>Số người gọi mỗi lượt:</label>
+    <input type="number" id="pickCount" value="1" min="1" max="20">
+    <div class="checkbox-row">
+      <input type="checkbox" id="avoidRepeat">
+      <label for="avoidRepeat">Không gọi lại người đã trả bài</label>
+    </div>
+    <button class="small-btn" id="resetHistoryBtn">🗑️ Xóa lịch sử</button>
+  </div>
+
+  <button id="spinBtn">🎲 QUAY NGAY</button>
+</div>
+
+<div id="stage"></div>
+
+<div class="panel" id="historyPanel">
+  <label>📋 Đã gọi (<span id="historyCount">0</span>):</label>
+  <div id="historyBox"></div>
+</div>
+
+<footer>Made with ❤️ — Nhấn phím <b>Space</b> để quay nhanh!</footer>
+
+<script>
+(function(){
+  let audioCtx = null;
+  let soundOn = true;
+
+  function ensureAudio(){
+    if(!audioCtx){
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+  }
+
+  function playTone(freq, duration, type='sine', vol=0.15, delay=0){
+    if(!soundOn) return;
+    ensureAudio();
+    const t0 = audioCtx.currentTime + delay;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t0);
+    gain.gain.setValueAtTime(vol, t0);
+    gain.gain.exponentialRampToValueAtTime(0.001, t0 + duration);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(t0);
+    osc.stop(t0 + duration);
+  }
+
+  function playTick(){
+    playTone(700 + Math.random()*300, 0.06, 'square', 0.08);
+  }
+  function playLock(){
+    playTone(1000, 0.18, 'triangle', 0.2);
+    playTone(1300, 0.18, 'triangle', 0.15, 0.05);
+  }
+  function playFanfare(){
+    const notes = [523.25, 659.25, 783.99, 1046.5];
+    notes.forEach((n,i)=> playTone(n, 0.3, 'sawtooth', 0.12, i*0.12));
+  }
+
+  document.getElementById('soundBtn').addEventListener('click', function(){
+    soundOn = !soundOn;
+    this.textContent = soundOn ? '🔊 Âm thanh: Bật' : '🔇 Âm thanh: Tắt';
+    if(soundOn) ensureAudio();
+  });
+
+  const confettiCanvas = document.getElementById('confetti');
+  const cctx = confettiCanvas.getContext('2d');
+  function resizeCanvas(){
+    confettiCanvas.width = window.innerWidth;
+    confettiCanvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  let particles = [];
+  const colors = ['#ff6a88','#ffb347','#6a11cb','#2575fc','#ffd200','#06d6a0','#ef476f'];
+
+  function burstConfetti(x, y, count=60){
+    for(let i=0;i<count;i++){
+      particles.push({
+        x: x, y: y,
+        vx: (Math.random()-0.5)*10,
+        vy: (Math.random()-1.5)*10,
+        size: Math.random()*8+4,
+        color: colors[Math.floor(Math.random()*colors.length)],
+        rot: Math.random()*360,
+        vr: (Math.random()-0.5)*10,
+        life: 100 + Math.random()*40
+      });
+    }
+  }
+
+  function animateConfetti(){
+    cctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
+    particles.forEach(p=>{
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.25;
+      p.rot += p.vr;
+      p.life--;
+      cctx.save();
+      cctx.translate(p.x, p.y);
+      cctx.rotate(p.rot*Math.PI/180);
+      cctx.fillStyle = p.color;
+      cctx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.6);
+      cctx.restore();
+    });
+    particles = particles.filter(p=>p.life>0 && p.y < confettiCanvas.height+50);
+    requestAnimationFrame(animateConfetti);
+  }
+  animateConfetti();
+
+  let mode = 'name';
+  const nameSection = document.getElementById('nameSection');
+  const numberSection = document.getElementById('numberSection');
+  const modeNameBtn = document.getElementById('modeNameBtn');
+  const modeNumberBtn = document.getElementById('modeNumberBtn');
+  const nameListEl = document.getElementById('nameList');
+  const numberListEl = document.getElementById('numberList');
+
+  function setMode(m){
+    mode = m;
+    if(m === 'name'){
+      modeNameBtn.classList.add('active');
+      modeNumberBtn.classList.remove('active');
+      nameSection.style.display = 'block';
+      numberSection.style.display = 'none';
+    } else {
+      modeNumberBtn.classList.add('active');
+      modeNameBtn.classList.remove('active');
+      numberSection.style.display = 'block';
+      nameSection.style.display = 'none';
+    }
+  }
+  modeNameBtn.addEventListener('click', ()=> setMode('name'));
+  modeNumberBtn.addEventListener('click', ()=> setMode('number'));
+
+  function generateSampleNames(){
+    const ho = ["Nguyễn","Trần","Lê","Phạm","Hoàng","Huỳnh","Phan","Vũ","Võ","Đặng","Bùi","Đỗ","Hồ","Ngô","Dương","Lý"];
+    const dem = ["Văn","Thị","Hữu","Đức","Minh","Ngọc","Thanh","Xuân","Quang","Hồng","Anh","Kim","Thành","Việt","Gia"];
+    const ten = ["An","Bình","Cường","Dũng","Em","Giang","Hà","Hùng","Khánh","Lan","Linh","Mai","Nam","Oanh","Phúc",
+                 "Quân","Sơn","Tâm","Thảo","Uyên","Vy","Yến","Trang","Tuấn","Trung","Phương","Hoa","Hiếu","Hạnh","Đạt"];
+    const set = new Set();
+    while(set.size < 100){
+      const h = ho[Math.floor(Math.random()*ho.length)];
+      const d = dem[Math.floor(Math.random()*dem.length)];
+      const t = ten[Math.floor(Math.random()*ten.length)];
+      set.add(`${h} ${d} ${t}`);
+    }
+    return Array.from(set);
+  }
+
+  document.getElementById('genNamesBtn').addEventListener('click', ()=>{
+    nameListEl.value = generateSampleNames().join('\n');
+  });
+
+  document.getElementById('genNumbersBtn').addEventListener('click', ()=>{
+    let max = parseInt(document.getElementById('maxNumber').value) || 100;
+    max = Math.min(Math.max(max,2), 100);
+    const arr = [];
+    for(let i=1;i<=max;i++) arr.push(i);
+    numberListEl.value = arr.join('\n');
+  });
+
+  nameListEl.value = generateSampleNames().join('\n');
+  document.getElementById('genNumbersBtn').click();
+
+  function getPool(){
+    const raw = (mode === 'name' ? nameListEl.value : numberListEl.value);
+    return raw.split('\n').map(s=>s.trim()).filter(s=>s.length>0);
+  }
+
+  let calledSet = new Set();
+  const historyBox = document.getElementById('historyBox');
+  const historyCount = document.getElementById('historyCount');
+
+  function updateHistoryUI(){
+    historyBox.innerHTML = '';
+    calledSet.forEach(v=>{
+      const chip = document.createElement('div');
+      chip.className = 'chip';
+      chip.textContent = v;
+      historyBox.appendChild(chip);
+    });
+    historyCount.textContent = calledSet.size;
+  }
+
+  document.getElementById('resetHistoryBtn').addEventListener('click', ()=>{
+    calledSet.clear();
+    updateHistoryUI();
+  });
+
+  const stage = document.getElementById('stage');
+  const spinBtn = document.getElementById('spinBtn');
+  let isSpinning = false;
+
+  function pickRandomUnique(arr, n){
+    const copy = arr.slice();
+    const result = [];
+    for(let i=0;i<n && copy.length>0;i++){
+      const idx = Math.floor(Math.random()*copy.length);
+      result.push(copy[idx]);
+      copy.splice(idx,1);
+    }
+    return result;
+  }
+
+  function spinSlot(slotEl, pool, finalValue, baseDuration, onDone){
+    slotEl.classList.add('spinning');
+    let delay = 45;
+    let elapsed = 0;
+
+    function tick(){
+      slotEl.textContent = pool[Math.floor(Math.random()*pool.length)];
+      playTick();
+      elapsed += delay;
+      delay *= 1.12;
+      if(elapsed < baseDuration){
+        setTimeout(tick, delay);
+      } else {
+        slotEl.classList.remove('spinning');
+        slotEl.textContent = finalValue;
+        slotEl.classList.add('locked');
+        playLock();
+        const rect = slotEl.getBoundingClientRect();
+        burstConfetti(rect.left + rect.width/2, rect.top + rect.height/2, 40);
+        onDone();
+      }
+    }
+    tick();
+  }
+
+  function startSpin(){
+    if(isSpinning) return;
+    ensureAudio();
+
+    const pool = getPool();
+    if(pool.length === 0){
+      alert('Danh sách đang trống! Hãy tạo hoặc nhập danh sách trước.');
+      return;
+    }
+
+    let count = parseInt(document.getElementById('pickCount').value) || 1;
+    count = Math.max(1, Math.min(count, pool.length));
+
+    const avoidRepeat = document.getElementById('avoidRepeat').checked;
+    let available = pool.slice();
+    if(avoidRepeat){
+      available = pool.filter(x => !calledSet.has(x));
+      if(available.length < count){
+        const confirmReset = confirm('Tất cả đã được gọi hết (hoặc không đủ)! Bạn có muốn RESET lịch sử và gọi lại từ đầu không?');
+        if(confirmReset){
+          calledSet.clear();
+          updateHistoryUI();
+          available = pool.slice();
+        } else {
+          return;
+        }
+      }
+    }
+
+    const selected = pickRandomUnique(available, count);
+
+    stage.innerHTML = '';
+    const slots = [];
+    selected.forEach(()=>{
+      const slot = document.createElement('div');
+      slot.className = 'slot';
+      slot.textContent = '???';
+      stage.appendChild(slot);
+      slots.push(slot);
+    });
+
+    isSpinning = true;
+    spinBtn.disabled = true;
+    spinBtn.textContent = '🎲 ĐANG QUAY...';
+
+    let doneCount = 0;
+    selected.forEach((val, i)=>{
+      setTimeout(()=>{
+        const baseDuration = 1300 + i*350;
+        spinSlot(slots[i], pool, val, baseDuration, ()=>{
+          doneCount++;
+          if(doneCount === selected.length){
+            selected.forEach(v => calledSet.add(v));
+            updateHistoryUI();
+            setTimeout(()=>{
+              playFanfare();
+              burstConfetti(window.innerWidth/2, window.innerHeight/3, 150);
+            }, 150);
+            isSpinning = false;
+            spinBtn.disabled = false;
+            spinBtn.textContent = '🎲 QUAY NGAY';
+          }
+        });
+      }, i*280);
+    });
+  }
+
+  spinBtn.addEventListener('click', startSpin);
+  window.addEventListener('keydown', (e)=>{
+    if(e.code === 'Space'){
+      e.preventDefault();
+      startSpin();
+    }
+  });
+
+  for(let i=0;i<6;i++){
+    const b = document.createElement('div');
+    b.className = 'blob';
+    const size = 80 + Math.random()*150;
+    b.style.width = size+'px';
+    b.style.height = size+'px';
+    b.style.left = Math.random()*100+'%';
+    b.style.top = Math.random()*100+'%';
+    b.style.animationDuration = (8+Math.random()*8)+'s';
+    document.body.appendChild(b);
+  }
+
+  updateHistoryUI();
+})();
+</script>
+</body>
+</html>
